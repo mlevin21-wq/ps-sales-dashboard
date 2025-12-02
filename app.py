@@ -340,28 +340,45 @@ if {"NA Sales", "PAL Sales", "Japan Sales"}.issubset(filtered.columns):
         )
 
         # 4. View state
-        view_state = pdk.ViewState(
-            latitude=40,
-            longitude=0,
-            zoom=1.2,
-            bearing=0,
-            pitch=30,
-        )
+        # Center on Atlantic so all regions show nicely
+    view_state = pdk.ViewState(
+        latitude=25,
+        longitude=0,
+        zoom=0.8,
+        bearing=0,
+        pitch=0,
+    )
 
-        # 5. Tooltip — uses safe column names
-        tooltip = {
-            "html": "<b>{region}</b><br/>Total Sales: {total_sales}",
-            "style": {"backgroundColor": "#333", "color": "white"},
-        }
+    # Better scaling factor for bubble radius
+    if max_sales > 0:
+        region_sales["radius"] = region_sales["total_sales"] / max_sales * 800000
+    else:
+        region_sales["radius"] = 0
 
-        st.pydeck_chart(
-            pdk.Deck(
-                map_style="mapbox://styles/mapbox/light-v9",
-                initial_view_state=view_state,
-                layers=[layer],
-                tooltip=tooltip,
-            )
+    layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=region_sales,
+        get_position="[lon, lat]",
+        get_radius="radius",
+        get_fill_color="[30, 136, 229, 180]",  # nice blue circles
+        pickable=True,
+        radius_min_pixels=10,
+        radius_max_pixels=80,
+    )
+
+    tooltip = {
+        "html": "<b>{region}</b><br/>Total Sales: {total_sales}",
+        "style": {"backgroundColor": "rgba(0,0,0,0.7)", "color": "white"},
+    }
+
+    st.pydeck_chart(
+        pdk.Deck(
+            map_style="mapbox://styles/mapbox/light-v9",
+            initial_view_state=view_state,
+            layers=[layer],
+            tooltip=tooltip,
         )
+    )
 
 # -------------------------
 # Show a sample of filtered data
