@@ -368,7 +368,7 @@ if {"NA Sales", "PAL Sales", "Japan Sales"}.issubset(filtered.columns):
 
     tooltip = {
         "html": "<b>{region}</b><br/>Total Sales: {total_sales}",
-        "style": {"backgroundColor": "rgba(0,0,0,0.7)", "color": "green"},
+        "style": {"backgroundColor": "rgba(0,0,0,0.7)", "color": "white"},
     }
 
     st.pydeck_chart(
