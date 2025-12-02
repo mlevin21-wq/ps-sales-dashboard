@@ -295,73 +295,73 @@ st.markdown("---")
 # 2) Map visualization of regional totals
 if {"NA Sales", "PAL Sales", "Japan Sales"}.issubset(filtered.columns):
 
-st.subheader("Chart B – Regional sales map (pydeck)")
-st.caption(
-    "Each bubble represents the total sales, aggregated over the filtered games, "
-    "for North America (NA), PAL (Europe), and Japan."
-)
-
-# Make sure the region columns exist
-region_cols = ["NA Sales", "PAL Sales", "Japan Sales"]
-available_region_cols = [c for c in region_cols if c in filtered.columns]
-
-if not available_region_cols:
-    st.info("No regional sales columns found in the data.")
-else:
-    # 1. Aggregate regional sales over the filtered games
-    na_total = filtered["NA Sales"].sum() if "NA Sales" in filtered.columns else 0
-    pal_total = filtered["PAL Sales"].sum() if "PAL Sales" in filtered.columns else 0
-    jp_total = filtered["Japan Sales"].sum() if "Japan Sales" in filtered.columns else 0
-
-    # 2. Build a small DataFrame with SAFE column names (no spaces)
-    region_sales = pd.DataFrame(
-        [
-            {"region": "North America", "lat": 40.0, "lon": -100.0, "total_sales": na_total},
-            {"region": "PAL (Europe)", "lat": 50.0, "lon": 10.0, "total_sales": pal_total},
-            {"region": "Japan", "lat": 36.0, "lon": 138.0, "total_sales": jp_total},
-        ]
+    st.subheader("Chart B – Regional sales map (pydeck)")
+    st.caption(
+        "Each bubble represents the total sales, aggregated over the filtered games, "
+        "for North America (NA), PAL (Europe), and Japan."
     )
 
-    # scale radius so bubbles aren't too huge or tiny
-    max_sales = region_sales["total_sales"].max()
-    if max_sales > 0:
-        region_sales["radius"] = region_sales["total_sales"] / max_sales * 2_000_000
+    # Make sure the region columns exist
+    region_cols = ["NA Sales", "PAL Sales", "Japan Sales"]
+    available_region_cols = [c for c in region_cols if c in filtered.columns]
+
+    if not available_region_cols:
+        st.info("No regional sales columns found in the data.")
     else:
-        region_sales["radius"] = 0
+        # 1. Aggregate regional sales over the filtered games
+        na_total = filtered["NA Sales"].sum() if "NA Sales" in filtered.columns else 0
+        pal_total = filtered["PAL Sales"].sum() if "PAL Sales" in filtered.columns else 0
+        jp_total = filtered["Japan Sales"].sum() if "Japan Sales" in filtered.columns else 0
 
-    # 3. Define pydeck layer
-    layer = pdk.Layer(
-        "ScatterplotLayer",
-        data=region_sales,
-        get_position="[lon, lat]",
-        get_radius="radius",
-        get_fill_color="[50, 100, 200, 180]",
-        pickable=True,
-    )
-
-    # 4. View state (center roughly on the Atlantic so all regions are visible)
-    view_state = pdk.ViewState(
-        latitude=40,
-        longitude=0,
-        zoom=1.2,
-        bearing=0,
-        pitch=30,
-    )
-
-    # 5. Tooltip – uses the **safe** column names: region, total_sales
-    tooltip = {
-        "html": "<b>{region}</b><br/>Total Sales: {total_sales}",
-        "style": {"backgroundColor": "#222", "color": "white"},
-    }
-
-    st.pydeck_chart(
-        pdk.Deck(
-            map_style="mapbox://styles/mapbox/light-v9",
-            initial_view_state=view_state,
-            layers=[layer],
-            tooltip=tooltip,
+        # 2. Build a small DataFrame with SAFE column names (no spaces)
+        region_sales = pd.DataFrame(
+            [
+                {"region": "North America", "lat": 40.0, "lon": -100.0, "total_sales": na_total},
+                {"region": "PAL (Europe)", "lat": 50.0, "lon": 10.0, "total_sales": pal_total},
+                {"region": "Japan", "lat": 36.0, "lon": 138.0, "total_sales": jp_total},
+            ]
         )
-    )
+
+        # Scale radius so bubbles look good
+        max_sales = region_sales["total_sales"].max()
+        if max_sales > 0:
+            region_sales["radius"] = region_sales["total_sales"] / max_sales * 2_000_000
+        else:
+            region_sales["radius"] = 0
+
+        # 3. Define pydeck layer
+        layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=region_sales,
+            get_position="[lon, lat]",
+            get_radius="radius",
+            get_fill_color="[50, 100, 200, 180]",
+            pickable=True,
+        )
+
+        # 4. View state
+        view_state = pdk.ViewState(
+            latitude=40,
+            longitude=0,
+            zoom=1.2,
+            bearing=0,
+            pitch=30,
+        )
+
+        # 5. Tooltip — uses safe column names
+        tooltip = {
+            "html": "<b>{region}</b><br/>Total Sales: {total_sales}",
+            "style": {"backgroundColor": "#333", "color": "white"},
+        }
+
+        st.pydeck_chart(
+            pdk.Deck(
+                map_style="mapbox://styles/mapbox/light-v9",
+                initial_view_state=view_state,
+                layers=[layer],
+                tooltip=tooltip,
+            )
+        )
 
 # -------------------------
 # Show a sample of filtered data
