@@ -295,12 +295,6 @@ st.markdown("---")
 # 2) Map visualization of regional totals
 if {"NA Sales", "PAL Sales", "Japan Sales"}.issubset(filtered.columns):
 
-    st.markdown(
-        """
-# =========================================
-# Chart B – Regional sales map (pydeck)
-# =========================================
-
 st.subheader("Chart B – Regional sales map (pydeck)")
 st.caption(
     "Each bubble represents the total sales, aggregated over the filtered games, "
